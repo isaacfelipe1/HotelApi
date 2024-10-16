@@ -9,6 +9,7 @@ namespace HotelApi.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Room> Rooms { get; set; }
 
     }
 }
