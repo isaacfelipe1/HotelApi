@@ -1,0 +1,60 @@
+# Visual Studio
+.vs/
+.vscode/
+*.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Build Folders
+bin/
+obj/
+out/
+
+# ASP.NET Scaffolding
+Areas/**/Views/**/*.cs
+Areas/**/Views/**/*.cshtml
+Areas/**/Views/**/*.cshtml.cs
+Areas/**/Views/**/*.cshtml.g.cs
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+Generated_Code/
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+# The packages folder can be ignored because of Package Restore
+**/packages/build/
+**/packages/repositories.config
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# NPM
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
