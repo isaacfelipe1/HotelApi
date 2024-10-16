@@ -1,4 +1,4 @@
-using HotelApi.Models; 
+using HotelApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelApi.Data
