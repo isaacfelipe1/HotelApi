@@ -1,5 +1,6 @@
 using HotelApi.Data;
 using HotelApi.Models;
+using Microsoft.AspNetCore.Authorization; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace HotelApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] 
     public class ClientesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -72,7 +74,6 @@ namespace HotelApi.Controllers
 
             return NoContent();
         }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCliente(int id)
         {

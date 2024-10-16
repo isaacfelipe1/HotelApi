@@ -1,4 +1,5 @@
 using HotelApi.Data;
+using HotelApi.Models; 
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +15,12 @@ builder.Services.AddCors(options =>
         });
 });
 
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<PessoaComAcesso, PerfilDeAcesso>()
+    .AddEntityFrameworkStores<ApplicationDbContext>(); 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -34,6 +39,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontendApp");
 
+app.UseAuthentication(); 
+
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();
