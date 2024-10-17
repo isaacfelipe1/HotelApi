@@ -9,10 +9,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontendApp",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")  // Apenas esta origem pode acessar
+            builder.WithOrigins("http://localhost:3000") 
                    .AllowAnyMethod()
                    .AllowAnyHeader()
-                   .AllowCredentials();  // Permitir o envio de cookies/credenciais
+                   .AllowCredentials();  
         });
 });
 

@@ -10,7 +10,7 @@ namespace HotelApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // Apenas usuários autenticados podem acessar os endpoints
+    [Authorize] 
     public class RoomsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,8 +19,6 @@ namespace HotelApi.Controllers
         {
             _context = context;
         }
-
-        // Cadastrar Quarto
         [HttpPost]
         public async Task<IActionResult> CreateRoom(Room room)
         {
@@ -28,15 +26,11 @@ namespace HotelApi.Controllers
             await _context.SaveChangesAsync();
             return Ok(room);
         }
-
-        // Listar todos os Quartos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Room>>> GetRooms()
         {
             return await _context.Rooms.ToListAsync();
         }
-
-        // Buscar Quarto por ID
         [HttpGet("{id}")]
         public async Task<ActionResult<Room>> GetRoom(int id)
         {
@@ -49,8 +43,6 @@ namespace HotelApi.Controllers
 
             return Ok(room);
         }
-
-        // Editar Quarto
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRoom(int id, Room updatedRoom)
         {
@@ -68,8 +60,6 @@ namespace HotelApi.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-
-        // Excluir Quarto
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRoom(int id)
         {

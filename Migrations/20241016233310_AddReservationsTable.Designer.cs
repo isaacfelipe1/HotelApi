@@ -3,6 +3,7 @@ using System;
 using HotelApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HotelApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241016233310_AddReservationsTable")]
+    partial class AddReservationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,14 +49,14 @@ namespace HotelApi.Migrations
                     b.Property<string>("Cidade")
                         .HasColumnType("text");
 
-                    b.Property<string>("DataEntrada")
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DataEntrada")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DataNascimento")
                         .HasColumnType("text");
 
-                    b.Property<string>("DataSaida")
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("DataSaida")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("MeioTransporte")
                         .HasColumnType("text");
@@ -204,13 +207,11 @@ namespace HotelApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CheckInDate")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CheckOutDate")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("CheckOutDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ClienteId")
                         .HasColumnType("integer");

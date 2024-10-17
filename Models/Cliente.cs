@@ -11,7 +11,6 @@ namespace HotelApi.Models
         public string? Nacionalidade { get; set; }
 
         public string? DataNascimento { get; set; }
-
         public string? Sexo { get; set; }
         public string? RG { get; set; }
         public string? Residencia { get; set; }
@@ -24,8 +23,8 @@ namespace HotelApi.Models
         public string? TelefoneResidencial { get; set; }
         public string? TelefoneComercial { get; set; }
 
-        public DateTime? DataEntrada { get; set; }
-        public DateTime? DataSaida { get; set; }
+        public string? DataEntrada { get; set; }
+        public string? DataSaida { get; set; }
 
         public string? Acompanhante { get; set; }
         public decimal? ValorEstadia { get; set; }

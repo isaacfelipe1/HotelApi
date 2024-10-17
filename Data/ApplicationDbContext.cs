@@ -10,6 +10,6 @@ namespace HotelApi.Data
 
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Room> Rooms { get; set; }
-
+        public DbSet<Reservation> Reservations { get; set; } 
     }
 }
