@@ -29,6 +29,7 @@ namespace HotelApi.Controllers
                 .Include(r => r.Room)
                 .ToListAsync();
         }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
@@ -50,6 +51,7 @@ namespace HotelApi.Controllers
         {
             var cliente = await _context.Clientes.FindAsync(reservation.ClienteId);
             var room = await _context.Rooms.FindAsync(reservation.RoomId);
+
             if (cliente == null)
             {
                 return BadRequest("Cliente não encontrado.");
@@ -59,6 +61,23 @@ namespace HotelApi.Controllers
             {
                 return BadRequest("Quarto não encontrado.");
             }
+            var reservasDoQuarto = _context.Reservations
+                .Where(r => r.RoomId == reservation.RoomId)
+                .AsEnumerable()
+                .ToList();
+            var isRoomReserved = reservasDoQuarto.Any(r =>
+            {
+                var checkInExistente = DateTime.Parse(r.CheckInDate);
+                var checkOutExistente = DateTime.Parse(r.CheckOutDate);
+                var novoCheckIn = DateTime.Parse(reservation.CheckInDate);
+                var novoCheckOut = DateTime.Parse(reservation.CheckOutDate);
+                return (novoCheckIn <= checkOutExistente && novoCheckOut >= checkInExistente);
+            });
+
+            if (isRoomReserved)
+            {
+                return BadRequest("Este quarto já está reservado nas datas selecionadas.");
+            }
             reservation.Cliente = cliente;
             reservation.Room = room;
 
@@ -67,6 +86,11 @@ namespace HotelApi.Controllers
 
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
         }
+
+
+
+
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
@@ -95,6 +119,7 @@ namespace HotelApi.Controllers
 
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {

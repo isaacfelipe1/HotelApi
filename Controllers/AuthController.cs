@@ -1,4 +1,4 @@
-using HotelApi.Models; 
+using HotelApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -50,6 +50,17 @@ namespace HotelApi.Controllers
         {
             await _signInManager.SignOutAsync();
             return Ok(new { Message = "User logged out successfully!" });
+        }
+
+        [HttpGet("check-auth")]
+        public IActionResult CheckAuth()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                return Ok(new { isAuthenticated = true });
+            }
+
+            return Ok(new { isAuthenticated = false });
         }
     }
 }
