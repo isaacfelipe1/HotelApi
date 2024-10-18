@@ -21,6 +21,7 @@ namespace HotelApi.Controllers
             _context = context;
         }
 
+        // Listar todas as reservas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
         {
@@ -30,6 +31,7 @@ namespace HotelApi.Controllers
                 .ToListAsync();
         }
 
+        // Obter uma reserva específica
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservation>> GetReservation(int id)
         {
@@ -46,6 +48,7 @@ namespace HotelApi.Controllers
             return reservation;
         }
 
+        // Criar uma nova reserva
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
@@ -61,10 +64,12 @@ namespace HotelApi.Controllers
             {
                 return BadRequest("Quarto não encontrado.");
             }
+
             var reservasDoQuarto = _context.Reservations
                 .Where(r => r.RoomId == reservation.RoomId)
                 .AsEnumerable()
                 .ToList();
+
             var isRoomReserved = reservasDoQuarto.Any(r =>
             {
                 var checkInExistente = DateTime.Parse(r.CheckInDate);
@@ -78,19 +83,22 @@ namespace HotelApi.Controllers
             {
                 return BadRequest("Este quarto já está reservado nas datas selecionadas.");
             }
+
             reservation.Cliente = cliente;
             reservation.Room = room;
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
+            // Atualizar o status do quarto para ocupado
+            room.IsOccupied = true;
+            _context.Entry(room).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
         }
 
-
-
-
-
+        // Atualizar uma reserva existente
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, Reservation reservation)
         {
@@ -120,19 +128,41 @@ namespace HotelApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReservation(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
+        // Excluir uma reserva
+        // Excluir uma reserva
+[HttpDelete("{id}")]
+public async Task<IActionResult> DeleteReservation(int id)
+{
+    var reservation = await _context.Reservations.FindAsync(id);
+    if (reservation == null)
+    {
+        return NotFound();
+    }
 
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+    // Liberar o quarto
+    var room = await _context.Rooms.FindAsync(reservation.RoomId);
+    if (room != null)
+    {
+        room.IsOccupied = false;
+        _context.Entry(room).State = EntityState.Modified;
+    }
 
-            return NoContent();
-        }
+    // Remover a reserva
+    _context.Reservations.Remove(reservation);
+    
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateException ex)
+    {
+        // Logue o erro ou trate conforme necessário
+        return StatusCode(500, "Erro ao excluir a reserva. Detalhes: " + ex.Message);
+    }
+
+    return NoContent();
+}
+
+        
     }
 }

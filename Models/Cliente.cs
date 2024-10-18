@@ -9,7 +9,6 @@ namespace HotelApi.Models
         public string CPF { get; set; }
         public string? Profissao { get; set; }
         public string? Nacionalidade { get; set; }
-
         public string? DataNascimento { get; set; }
         public string? Sexo { get; set; }
         public string? RG { get; set; }
@@ -17,17 +16,8 @@ namespace HotelApi.Models
         public string? CEP { get; set; }
         public string? Cidade { get; set; }
         public string? Pais { get; set; }
-        public string? MotivoViagem { get; set; }
-        public string? MeioTransporte { get; set; }
-        public string? ProximoDestino { get; set; }
         public string? TelefoneResidencial { get; set; }
         public string? TelefoneComercial { get; set; }
-
-        public string? DataEntrada { get; set; }
-        public string? DataSaida { get; set; }
-
-        public string? Acompanhante { get; set; }
-        public decimal? ValorEstadia { get; set; }
-        public string? Apartamento { get; set; }
+        public string? Email { get; set; }
     }
 }

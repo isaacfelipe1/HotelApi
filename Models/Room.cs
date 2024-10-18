@@ -12,5 +12,7 @@ namespace HotelApi.Models
         public string Type { get; set; }
         public decimal PricePerNight { get; set; } 
         public bool IsOccupied { get; set; } 
+       
+
     }
 }

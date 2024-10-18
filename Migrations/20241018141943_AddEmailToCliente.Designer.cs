@@ -3,6 +3,7 @@ using System;
 using HotelApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HotelApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241018141943_AddEmailToCliente")]
+    partial class AddEmailToCliente
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +33,12 @@ namespace HotelApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Acompanhante")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Apartamento")
+                        .HasColumnType("text");
+
                     b.Property<string>("CEP")
                         .HasColumnType("text");
 
@@ -40,10 +49,22 @@ namespace HotelApi.Migrations
                     b.Property<string>("Cidade")
                         .HasColumnType("text");
 
+                    b.Property<string>("DataEntrada")
+                        .HasColumnType("text");
+
                     b.Property<string>("DataNascimento")
                         .HasColumnType("text");
 
+                    b.Property<string>("DataSaida")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MeioTransporte")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MotivoViagem")
                         .HasColumnType("text");
 
                     b.Property<string>("Nacionalidade")
@@ -57,6 +78,9 @@ namespace HotelApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Profissao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProximoDestino")
                         .HasColumnType("text");
 
                     b.Property<string>("RG")
@@ -73,6 +97,9 @@ namespace HotelApi.Migrations
 
                     b.Property<string>("TelefoneResidencial")
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("ValorEstadia")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
@@ -192,15 +219,6 @@ namespace HotelApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("ClienteId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IncluirCafeDaManha")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("NumeroDeAdultos")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("NumeroDeCriancas")
                         .HasColumnType("integer");
 
                     b.Property<int>("RoomId")
