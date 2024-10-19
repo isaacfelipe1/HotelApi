@@ -47,9 +47,6 @@ namespace HotelApi.Controllers
 
             return reservation;
         }
-
-
-
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
@@ -88,9 +85,16 @@ namespace HotelApi.Controllers
             reservation.Cliente = cliente;
             reservation.Room = room;
 
-            // Lógica para calcular o preço total, incluindo 40 reais por adulto extra
+            // Cálculo para adultos adicionais (40 reais por adulto extra)
             decimal adicionalPorAdulto = 40;
-            reservation.TotalPrice = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
+            decimal valorFinalAdultos = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
+
+            // Cálculo para crianças com 50% de desconto
+            decimal descontoPorCrianca = room.PricePerNight * 0.5m;
+            decimal valorFinalCriancas = reservation.NumeroDeCriancas > 0 ? descontoPorCrianca * reservation.NumeroDeCriancas : 0;
+
+            // Somar os dois valores para obter o preço total
+            reservation.TotalPrice = valorFinalAdultos + valorFinalCriancas;
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
@@ -102,8 +106,6 @@ namespace HotelApi.Controllers
 
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
         }
-
-
 
         // Atualizar uma reserva existente
         [HttpPut("{id}")]
