@@ -48,64 +48,66 @@ namespace HotelApi.Controllers
             return reservation;
         }
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
-        {
-            var cliente = await _context.Clientes.FindAsync(reservation.ClienteId);
-            var room = await _context.Rooms.FindAsync(reservation.RoomId);
+public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
+{
+    var cliente = await _context.Clientes.FindAsync(reservation.ClienteId);
+    var room = await _context.Rooms.FindAsync(reservation.RoomId);
 
-            if (cliente == null)
-            {
-                return BadRequest("Cliente não encontrado.");
-            }
+    if (cliente == null)
+    {
+        return BadRequest("Cliente não encontrado.");
+    }
 
-            if (room == null)
-            {
-                return BadRequest("Quarto não encontrado.");
-            }
+    if (room == null)
+    {
+        return BadRequest("Quarto não encontrado.");
+    }
 
-            var reservasDoQuarto = _context.Reservations
-                .Where(r => r.RoomId == reservation.RoomId)
-                .AsEnumerable()
-                .ToList();
+    var reservasDoQuarto = _context.Reservations
+        .Where(r => r.RoomId == reservation.RoomId)
+        .AsEnumerable()
+        .ToList();
 
-            var isRoomReserved = reservasDoQuarto.Any(r =>
-            {
-                var checkInExistente = DateTime.Parse(r.CheckInDate);
-                var checkOutExistente = DateTime.Parse(r.CheckOutDate);
-                var novoCheckIn = DateTime.Parse(reservation.CheckInDate);
-                var novoCheckOut = DateTime.Parse(reservation.CheckOutDate);
-                return (novoCheckIn <= checkOutExistente && novoCheckOut >= checkInExistente);
-            });
+    var isRoomReserved = reservasDoQuarto.Any(r =>
+    {
+        var checkInExistente = DateTime.Parse(r.CheckInDate);
+        var checkOutExistente = DateTime.Parse(r.CheckOutDate);
+        var novoCheckIn = DateTime.Parse(reservation.CheckInDate);
+        var novoCheckOut = DateTime.Parse(reservation.CheckOutDate);
+        return (novoCheckIn <= checkOutExistente && novoCheckOut >= checkInExistente);
+    });
 
-            if (isRoomReserved)
-            {
-                return BadRequest("Este quarto já está reservado nas datas selecionadas.");
-            }
+    if (isRoomReserved)
+    {
+        return BadRequest("Este quarto já está reservado nas datas selecionadas.");
+    }
 
-            reservation.Cliente = cliente;
-            reservation.Room = room;
+    reservation.Cliente = cliente;
+    reservation.Room = room;
 
-            // Cálculo para adultos adicionais (40 reais por adulto extra)
-            decimal adicionalPorAdulto = 40;
-            decimal valorFinalAdultos = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
+    // Cálculo para adultos adicionais (40 reais por adulto extra)
+    decimal adicionalPorAdulto = 40;
+    decimal valorFinalAdultos = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
 
-            // Cálculo para crianças com 50% de desconto
-            decimal descontoPorCrianca = room.PricePerNight * 0.5m;
-            decimal valorFinalCriancas = reservation.NumeroDeCriancas > 0 ? descontoPorCrianca * reservation.NumeroDeCriancas : 0;
+    // Cálculo para crianças a partir de 6 anos com 50% de desconto
+    decimal descontoPorCrianca = room.PricePerNight * 0.5m;
+    decimal valorFinalCriancas6OuMais = reservation.NumeroDeCriancas > 0 ? descontoPorCrianca * reservation.NumeroDeCriancas : 0;
 
-            // Somar os dois valores para obter o preço total
-            reservation.TotalPrice = valorFinalAdultos + valorFinalCriancas;
+    // Crianças de 0 a 5 anos não pagam, então não há necessidade de incluir no cálculo
 
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
+    // Somar os valores dos adultos e crianças a partir de 6 anos para obter o preço total
+    reservation.TotalPrice = valorFinalAdultos + valorFinalCriancas6OuMais;
 
-            // Atualizar o status do quarto para ocupado
-            room.IsOccupied = true;
-            _context.Entry(room).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+    _context.Reservations.Add(reservation);
+    await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
-        }
+    // Atualizar o status do quarto para ocupado
+    room.IsOccupied = true;
+    _context.Entry(room).State = EntityState.Modified;
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
+}
 
         // Atualizar uma reserva existente
         [HttpPut("{id}")]

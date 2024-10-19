@@ -18,6 +18,7 @@ namespace HotelApi.Models
         
         // Campos para especificar a quantidade de adultos e crianças
         public int NumeroDeAdultos { get; set; }
+        public int NumeroDeCriancas0A5Anos { get; set; } 
         public int NumeroDeCriancas { get; set; }
         public bool IncluirCafeDaManha { get; set; }
         public decimal TotalPrice { get; set; }
