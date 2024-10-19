@@ -20,5 +20,6 @@ namespace HotelApi.Models
         public int NumeroDeAdultos { get; set; }
         public int NumeroDeCriancas { get; set; }
         public bool IncluirCafeDaManha { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 }

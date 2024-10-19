@@ -48,7 +48,8 @@ namespace HotelApi.Controllers
             return reservation;
         }
 
-        // Criar uma nova reserva
+
+
         [HttpPost]
         public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
         {
@@ -87,6 +88,10 @@ namespace HotelApi.Controllers
             reservation.Cliente = cliente;
             reservation.Room = room;
 
+            // Lógica para calcular o preço total, incluindo 40 reais por adulto extra
+            decimal adicionalPorAdulto = 40;
+            reservation.TotalPrice = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
+
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
@@ -97,6 +102,8 @@ namespace HotelApi.Controllers
 
             return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
         }
+
+
 
         // Atualizar uma reserva existente
         [HttpPut("{id}")]
@@ -130,39 +137,39 @@ namespace HotelApi.Controllers
 
         // Excluir uma reserva
         // Excluir uma reserva
-[HttpDelete("{id}")]
-public async Task<IActionResult> DeleteReservation(int id)
-{
-    var reservation = await _context.Reservations.FindAsync(id);
-    if (reservation == null)
-    {
-        return NotFound();
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
 
-    // Liberar o quarto
-    var room = await _context.Rooms.FindAsync(reservation.RoomId);
-    if (room != null)
-    {
-        room.IsOccupied = false;
-        _context.Entry(room).State = EntityState.Modified;
-    }
+            // Liberar o quarto
+            var room = await _context.Rooms.FindAsync(reservation.RoomId);
+            if (room != null)
+            {
+                room.IsOccupied = false;
+                _context.Entry(room).State = EntityState.Modified;
+            }
 
-    // Remover a reserva
-    _context.Reservations.Remove(reservation);
-    
-    try
-    {
-        await _context.SaveChangesAsync();
-    }
-    catch (DbUpdateException ex)
-    {
-        // Logue o erro ou trate conforme necessário
-        return StatusCode(500, "Erro ao excluir a reserva. Detalhes: " + ex.Message);
-    }
+            // Remover a reserva
+            _context.Reservations.Remove(reservation);
 
-    return NoContent();
-}
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Logue o erro ou trate conforme necessário
+                return StatusCode(500, "Erro ao excluir a reserva. Detalhes: " + ex.Message);
+            }
 
-        
+            return NoContent();
+        }
+
+
     }
 }
