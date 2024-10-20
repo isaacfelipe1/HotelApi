@@ -47,7 +47,8 @@ namespace HotelApi.Controllers
 
             return reservation;
         }
-        [HttpPost]
+
+[HttpPost]
 public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
 {
     var cliente = await _context.Clientes.FindAsync(reservation.ClienteId);
@@ -63,6 +64,20 @@ public async Task<ActionResult<Reservation>> PostReservation(Reservation reserva
         return BadRequest("Quarto não encontrado.");
     }
 
+    // Ajuste o horário de check-in e check-out para 12:00
+    var checkInDate = DateTime.Parse(reservation.CheckInDate).Date.AddHours(12); // Check-in sempre às 12h
+    var checkOutDate = DateTime.Parse(reservation.CheckOutDate).Date.AddHours(12); // Check-out sempre às 12h
+
+    // Verifica se o check-out é posterior ao check-in
+    if (checkOutDate <= checkInDate)
+    {
+        return BadRequest("Data de check-out deve ser posterior à data de check-in.");
+    }
+
+    // Calcular a quantidade de dias
+    int totalDays = (checkOutDate - checkInDate).Days;
+
+    // Verificar se o quarto já está reservado nas datas selecionadas
     var reservasDoQuarto = _context.Reservations
         .Where(r => r.RoomId == reservation.RoomId)
         .AsEnumerable()
@@ -70,11 +85,9 @@ public async Task<ActionResult<Reservation>> PostReservation(Reservation reserva
 
     var isRoomReserved = reservasDoQuarto.Any(r =>
     {
-        var checkInExistente = DateTime.Parse(r.CheckInDate);
-        var checkOutExistente = DateTime.Parse(r.CheckOutDate);
-        var novoCheckIn = DateTime.Parse(reservation.CheckInDate);
-        var novoCheckOut = DateTime.Parse(reservation.CheckOutDate);
-        return (novoCheckIn <= checkOutExistente && novoCheckOut >= checkInExistente);
+        var checkInExistente = DateTime.Parse(r.CheckInDate).Date.AddHours(12);
+        var checkOutExistente = DateTime.Parse(r.CheckOutDate).Date.AddHours(12);
+        return (checkInDate < checkOutExistente && checkOutDate > checkInExistente);
     });
 
     if (isRoomReserved)
@@ -85,19 +98,19 @@ public async Task<ActionResult<Reservation>> PostReservation(Reservation reserva
     reservation.Cliente = cliente;
     reservation.Room = room;
 
-    // Cálculo para adultos adicionais (40 reais por adulto extra)
-    decimal adicionalPorAdulto = 40;
-    decimal valorFinalAdultos = room.PricePerNight + (reservation.NumeroDeAdultos > 1 ? (reservation.NumeroDeAdultos - 1) * adicionalPorAdulto : 0);
+    // Cálculo do valor total com base na quantidade de dias e no preço do quarto
+    decimal valorTotalAdultos = room.PricePerNight * totalDays;
 
-    // Cálculo para crianças a partir de 6 anos com 50% de desconto
-    decimal descontoPorCrianca = room.PricePerNight * 0.5m;
-    decimal valorFinalCriancas6OuMais = reservation.NumeroDeCriancas > 0 ? descontoPorCrianca * reservation.NumeroDeCriancas : 0;
+    // Se houver crianças a partir de 6 anos, aplicar 50% de desconto na diária delas
+    decimal valorDescontoCriancas = (room.PricePerNight * 0.5m) * reservation.NumeroDeCriancas * totalDays;
 
-    // Crianças de 0 a 5 anos não pagam, então não há necessidade de incluir no cálculo
+    // Crianças de 0 a 5 anos não pagam
+    decimal valorFinalCriancas0A5 = 0;
 
-    // Somar os valores dos adultos e crianças a partir de 6 anos para obter o preço total
-    reservation.TotalPrice = valorFinalAdultos + valorFinalCriancas6OuMais;
+    // Somar valores para calcular o preço total
+    reservation.TotalPrice = valorTotalAdultos + valorDescontoCriancas;
 
+    // Salvar a reserva e marcar o quarto como ocupado
     _context.Reservations.Add(reservation);
     await _context.SaveChangesAsync();
 
@@ -109,38 +122,100 @@ public async Task<ActionResult<Reservation>> PostReservation(Reservation reserva
     return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
 }
 
-        // Atualizar uma reserva existente
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
+
+  [HttpPut("{id}")]
+public async Task<IActionResult> PutReservation(int id, Reservation reservation)
+{
+    if (id != reservation.Id)
+    {
+        return BadRequest("O ID da reserva não corresponde.");
+    }
+
+    var cliente = await _context.Clientes.FindAsync(reservation.ClienteId);
+    var room = await _context.Rooms.FindAsync(reservation.RoomId);
+
+    if (cliente == null)
+    {
+        return BadRequest("Cliente não encontrado.");
+    }
+
+    if (room == null)
+    {
+        return BadRequest("Quarto não encontrado.");
+    }
+
+    // Ajuste o horário de check-in e check-out para 12:00
+    var checkInDate = DateTime.Parse(reservation.CheckInDate).Date.AddHours(12);
+    var checkOutDate = DateTime.Parse(reservation.CheckOutDate).Date.AddHours(12);
+
+    // Verifica se o check-out é posterior ao check-in
+    if (checkOutDate <= checkInDate)
+    {
+        return BadRequest("Data de check-out deve ser posterior à data de check-in.");
+    }
+
+    // Calcular a quantidade de dias
+    int totalDays = (checkOutDate - checkInDate).Days;
+
+    // Verificar se o quarto já está reservado nas datas selecionadas (excluindo a reserva atual)
+    var reservasDoQuarto = _context.Reservations
+        .Where(r => r.RoomId == reservation.RoomId && r.Id != id)
+        .AsEnumerable()
+        .ToList();
+
+    var isRoomReserved = reservasDoQuarto.Any(r =>
+    {
+        var checkInExistente = DateTime.Parse(r.CheckInDate).Date.AddHours(12);
+        var checkOutExistente = DateTime.Parse(r.CheckOutDate).Date.AddHours(12);
+        return (checkInDate < checkOutExistente && checkOutDate > checkInExistente);
+    });
+
+    if (isRoomReserved)
+    {
+        return BadRequest("Este quarto já está reservado nas datas selecionadas.");
+    }
+
+    reservation.Cliente = cliente;
+    reservation.Room = room;
+
+    // Cálculo do valor total com base na quantidade de dias e no preço do quarto
+    decimal valorTotalAdultos = room.PricePerNight * totalDays;
+
+    // Se houver crianças a partir de 6 anos, aplicar 50% de desconto na diária delas
+    decimal valorDescontoCriancas = (room.PricePerNight * 0.5m) * reservation.NumeroDeCriancas * totalDays;
+
+    // Crianças de 0 a 5 anos não pagam
+    decimal valorFinalCriancas0A5 = 0;
+
+    // Somar valores para calcular o preço total
+    reservation.TotalPrice = valorTotalAdultos + valorDescontoCriancas;
+
+    _context.Entry(reservation).State = EntityState.Modified;
+
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateConcurrencyException)
+    {
+        if (!_context.Reservations.Any(e => e.Id == id))
         {
-            if (id != reservation.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(reservation).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Reservations.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return NotFound();
         }
+        else
+        {
+            throw;
+        }
+    }
 
-        // Excluir uma reserva
-        // Excluir uma reserva
+    // Atualizar o status do quarto
+    room.IsOccupied = true;
+    _context.Entry(room).State = EntityState.Modified;
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(int id)
         {

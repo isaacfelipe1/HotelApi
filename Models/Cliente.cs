@@ -19,5 +19,9 @@ namespace HotelApi.Models
         public string? TelefoneResidencial { get; set; }
         public string? TelefoneComercial { get; set; }
         public string? Email { get; set; }
+        public string? MotivoViagem { get; set; }
+        public string? MeioTransporte { get; set; }
+        public string? ProximoDestino { get; set; }
+
     }
 }
