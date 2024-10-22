@@ -15,8 +15,6 @@ namespace HotelApi.Models
         public string CheckInDate { get; set; }
         public string CheckOutDate { get; set; }
         public string Status { get; set; }
-        
-        // Campos para especificar a quantidade de adultos e crianças
         public int NumeroDeAdultos { get; set; }
         public int NumeroDeCriancas0A5Anos { get; set; } 
         public int NumeroDeCriancas { get; set; }
